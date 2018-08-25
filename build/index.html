@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+</head>
+
+<body>
+  <div id='root'></div>
+</body>
+
+<script>
+  let yq = new YQ({
+    el: '#app',
+    template: '<div>{{a}}</div>',
+    data: {
+      // return '我2323223322323'
+      message: 'Hello Vue!'
+    },
+  })
+
+  // console.log(yq._data.message)
+  // yq._data.message= '222222222222'
+
+
+ //  let fun = function fun(a){
+	// console.log(a)
+ //  }
+ //  let fun2 = function fun2(a){
+	// console.log(a,'333')
+ //  }
+ //  yq.$on('msg',fun)
+ //  yq.$on('msg',fun2)
+ //  yq.$emit('msg','2')
+
+</script>
+
+</html>
