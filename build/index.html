@@ -6,20 +6,84 @@
 </head>
 
 <body>
-  <div id='root'></div>
+  <div id='app'>
+
+  <template id="demo">
+    <div>
+      <h1 style="color:red">我是选项模板3</h1>
+      <p>{{number}}</p>
+      <p>{{message}}</p>
+      <div>
+        <div>
+          1
+          <div>11</div>  
+          <div>12</div>  
+        </div>
+        <div>2</div>
+        <div>3</div>
+        <div>4</div>
+        <div>5</div>
+      </div>
+    </div>
+  </template>
+
+  	<!-- <form>
+      <input type="text"  v-model="number">
+      <button type="button" v-click="increment">增加</button>
+    </form>
+    <h3 v-bind="number"></h3> -->
+  </div>
 </body>
 
 <script>
   let yq = new YQ({
     el: '#app',
-    template: '<div>{{a}}</div>',
+    template: '#demo',
     data: {
-      // return '我2323223322323'
-      message: 'Hello Vue!'
+      number: 1,
+      message: 'Hello Vue!',
+      showPopUp: true,
+      rankLists:{
+      	a:'1',
+      	b:'2'
+      }
+      // testObj:{
+      // 	a:'testObj.a',
+      // 	b:'testObj.b',
+      // }
     },
+    // computed:{
+    //   reversedMessage: function () {
+    //     return this.message.split('').reverse().join('')
+    //   }
+    // },
+   //  watch: {
+	  //   // showPopUp(curVal){
+	  //   //   console.log(curVal)
+	  //   // },
+	  //   rankLists: {
+	  //     handler(newName, oldName) {
+	  //       console.log(newName, oldName)
+	  //     },
+	  //     deep: true
+	  //   }
+	  // }, 
+    // methods: {
+    //     increment: function() {
+    //       this.number ++;
+    //     },
+    //  }
   })
+  // console.log(rankList.a)
 
-  // console.log(yq._data.message)
+  // console.log(yq.number)
+  // console.log(yq.message)
+  
+  // console.log(yq.testObj.a)
+  //  console.log(yq.testObj.a)
+  //  yq.testObj.a = 'testObj.c'
+  // yq.message = 2
+  // console.log(yq.message)
   // yq._data.message= '222222222222'
 
 

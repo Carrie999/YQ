@@ -111,6 +111,7 @@ export function observe (value, asRootData) {
   if (!isObject(value) ) {
     return
   }
+
   let ob
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
     ob = value.__ob__
@@ -126,6 +127,7 @@ export function observe (value, asRootData) {
   if (asRootData && ob) {
     ob.vmCount++
   }
+
   return ob
 }
 
@@ -140,13 +142,11 @@ export function defineReactive (
   shallow
 ) {
   const dep = new Dep()
-
   const property = Object.getOwnPropertyDescriptor(obj, key)
   if (property && property.configurable === false) {
     return
   }
   // console.log(property)
-  // console.log(property.get)
   // cater for pre-defined getter/setters
   const getter = property && property.get
   const setter = property && property.set
@@ -169,10 +169,10 @@ export function defineReactive (
           }
         }
       }
-      // return 1
       return value
     },
     set: function reactiveSetter (newVal) {
+       console.log('2222')
       const value = getter ? getter.call(obj) : val
       /* eslint-disable no-self-compare */
       if (newVal === value || (newVal !== newVal && value !== value)) {
@@ -191,6 +191,9 @@ export function defineReactive (
       dep.notify()
     }
   })
+
+
+
 }
 
 /**

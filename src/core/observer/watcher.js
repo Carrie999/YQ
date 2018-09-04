@@ -49,6 +49,9 @@ export default class Watcher {
     options,
     isRenderWatcher
   ) {
+    // console.log('11111')
+    // console.log(expOrFn,1,cb,2,options)
+    // vm._watchers = []
     this.vm = vm
     if (isRenderWatcher) {
       vm._watcher = this
@@ -56,6 +59,7 @@ export default class Watcher {
     vm._watchers.push(this)
     // options
     if (options) {
+
       this.deep = !!options.deep //用来告诉当前观察者实例对象是否是深度观测
       this.user = !!options.user //用来标识当前观察者实例对象是开发者定义的还是内部定义的
       this.computed = !!options.computed //用来标识当前观察者实例对象是否是计算属性的观察者
@@ -78,6 +82,7 @@ export default class Watcher {
     // parse expression for getter
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn
+
     } else {
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
@@ -103,11 +108,14 @@ export default class Watcher {
    */
    //求值
   get () {
+
     pushTarget(this)
     let value
     const vm = this.vm
     try {
       value = this.getter.call(vm, vm)
+      // console.log(value)
+            
     } catch (e) {
       if (this.user) {
         handleError(e, vm, `getter for watcher "${this.expression}"`)

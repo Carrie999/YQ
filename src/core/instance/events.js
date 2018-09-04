@@ -7,41 +7,41 @@ import {
   handleError,
   formatComponentName
 } from '../util/index'
-// import { updateListeners } from '../vdom/helpers/index'
+import { updateListeners } from '../vdom/helpers/index'
 
 export function initEvents (vm) {
   vm._events = Object.create(null)
   vm._hasHookEvent = false
   // init parent attached events
-  // const listeners = vm.$options._parentListeners
-  // if (listeners) {
-  //   updateComponentListeners(vm, listeners)
-  // }
+  const listeners = vm.$options._parentListeners
+  if (listeners) {
+    updateComponentListeners(vm, listeners)
+  }
 }
 
-// let target
+let target
 
-// function add (event, fn, once) {
-//   if (once) {
-//     target.$once(event, fn)
-//   } else {
-//     target.$on(event, fn)
-//   }
-// }
+function add (event, fn, once) {
+  if (once) {
+    target.$once(event, fn)
+  } else {
+    target.$on(event, fn)
+  }
+}
 
-// function remove (event, fn) {
-//   target.$off(event, fn)
-// }
+function remove (event, fn) {
+  target.$off(event, fn)
+}
 
-// export function updateComponentListeners (
-//   vm,
-//   listeners,
-//   oldListeners
-// ) {
-//   target = vm
-//   // updateListeners(listeners, oldListeners || {}, add, remove, vm)
-//   target = undefined
-// }
+export function updateComponentListeners (
+  vm,
+  listeners,
+  oldListeners
+) {
+  target = vm
+  updateListeners(listeners, oldListeners || {}, add, remove, vm)
+  target = undefined
+}
 
 export function eventsMixin (YQ) {
   const hookRE = /^hook:/

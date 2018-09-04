@@ -38,10 +38,8 @@ const sharedPropertyDefinition = {
 export function proxy (target, sourceKey, key) {
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
-    // return 1
   }
   sharedPropertyDefinition.set = function proxySetter (val) {
-    // console.log('set',val)
     this[sourceKey][key] = val
   }
   Object.defineProperty(target, key, sharedPropertyDefinition)
@@ -58,6 +56,7 @@ export function initState (vm) {
   } else {
     observe(vm._data = {}, true /* asRootData */)
   }
+  // console.log(opts.computed)
   if (opts.computed) initComputed(vm, opts.computed)
   if (opts.watch && opts.watch !== nativeWatch) {
     initWatch(vm, opts.watch)
@@ -155,10 +154,9 @@ function initData (vm) {
   }
   // observe data
   observe(data, true /* asRootData */)
-  console.log(data)
-  console.log(data.message)
-  console.log(data.message)
-  console.log(data.message)
+  // console.log(data.message)
+ 
+
 }
 
 export function getData (data, vm) {
@@ -181,7 +179,6 @@ function initComputed (vm, computed) {
   const watchers = vm._computedWatchers = Object.create(null)
   // computed properties are just getters during SSR
   const isSSR = isServerRendering()
-
   for (const key in computed) {
     const userDef = computed[key]
     const getter = typeof userDef === 'function' ? userDef : userDef.get
@@ -200,7 +197,10 @@ function initComputed (vm, computed) {
         noop,
         computedWatcherOptions
       )
+
     }
+    // console.log(watchers)
+    // console.log(watchers[key])
 
     // component-defined computed properties are already defined on the
     // component prototype. We only need to define computed properties defined
@@ -222,6 +222,7 @@ export function defineComputed (
   key,
   userDef
 ) {
+
   const shouldCache = !isServerRendering()
   if (typeof userDef === 'function') {
     sharedPropertyDefinition.get = shouldCache
@@ -309,10 +310,7 @@ function createWatcher (
 ) {
   if (isPlainObject(handler)) {
     options = handler
-    handler = handler.handler
-  }
-  if (typeof handler === 'string') {
-    handler = vm[handler]
+    handler = handler.handler 
   }
   return vm.$watch(expOrFn, handler, options)
 }

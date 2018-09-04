@@ -14,6 +14,9 @@ import { mergeOptions } from '../util/index'
 import { initEvents } from './events'
 import { initProxy } from './proxy'
 import { initState } from './state'
+import { initLifecycle, callHook } from './lifecycle'
+import { initWatcher } from './initWatcher'
+import { initRender } from './render'
 
 let uid = 0
 
@@ -29,19 +32,38 @@ export function initMixin(YQ) {
     vm._uid = uid++
 
     vm._isYQ = true
-
-    vm.$options = mergeOptions(
-      resolveConstructorOptions(vm.constructor),
-      options || {},
-      vm
-    )
-
+    
+    if (options && options._isComponent) {
+      // optimize internal component instantiation
+      // since dynamic options merging is pretty slow, and none of the
+      // internal component options needs special treatment.
+      initInternalComponent(vm, options)
+    } else {
+      vm.$options = mergeOptions(
+        resolveConstructorOptions(vm.constructor),
+        options || {},
+        vm
+      )
+    }
+    
 
     initProxy(vm)
 
     vm._self = vm
+
+    initLifecycle(vm)
     initEvents(vm)
+    initRender(vm)
+    callHook(vm, 'beforeCreate')
+    initWatcher(vm)
     initState(vm)
+    callHook(vm, 'created')
+
+    
+    if (vm.$options.el) {
+      vm.$mount(vm.$options.el)
+    }
+
 
     // console.log(vm)
 
@@ -61,116 +83,57 @@ export function resolveConstructorOptions (Ctor) {
   return options
 }
 
-// function initWatch(vm) {
-//     var watch = vm.$options.watch;
-//     if (watch) {
-//         for (const key in watch) {
-//             const handler = watch[key]
-//             if (Array.isArray(handler)) {
-//                 for (let i = 0; i < handler.length; i++) {
-//                     createWatcher(vm, key, handler[i])
-//                 }
-//             } else {
-//                 createWatcher(vm, key, handler)
-//             }
-//         }
-//     }
-// }
 
-// function createWatcher(vm, key, handler) {
-//     let options
-//     //是个对象时，主要为了写deep属性
-//     if (isPlainObject(handler)) {
-//         options = handler
-//         handler = handler.handler
-//     }
-//     //直接写方法名时 
-//     if (typeof handler === 'string') {
-//         handler = vm[handler]
-//     }
-//     vm.$watch(key, handler, options)
-// }
+export function initInternalComponent (vm, options) {
+  const opts = vm.$options = Object.create(vm.constructor.options)
+  // doing this because it's faster than dynamic enumeration.
+  const parentVnode = options._parentVnode
+  opts.parent = options.parent
+  opts._parentVnode = parentVnode
+
+  const vnodeComponentOptions = parentVnode.componentOptions
+  opts.propsData = vnodeComponentOptions.propsData
+  opts._parentListeners = vnodeComponentOptions.listeners
+  opts._renderChildren = vnodeComponentOptions.children
+  opts._componentTag = vnodeComponentOptions.tag
+
+  if (options.render) {
+    opts.render = options.render
+    opts.staticRenderFns = options.staticRenderFns
+  }
+}
 
 
+function resolveModifiedOptions (Ctor){
+  let modified
+  const latest = Ctor.options
+  const extended = Ctor.extendOptions
+  const sealed = Ctor.sealedOptions
+  for (const key in latest) {
+    if (latest[key] !== sealed[key]) {
+      if (!modified) modified = {}
+      modified[key] = dedupe(latest[key], extended[key], sealed[key])
+    }
+  }
+  return modified
+}
 
-// //初始化计算属性
-// const computedWatcherOptions = { lazy: true }
-// function initComputed(vm) {
-//     var computed = vm.$options.computed;
-//     if (!computed) return;
-//     const watchers = vm._computedWatchers = Object.create(null)
-//     for (const key in computed) {
-//         const userDef = computed[key]
-//         let getter = typeof userDef === 'function' ? userDef : userDef.get
-
-//         watchers[key] = new Watcher(vm, getter, noop, computedWatcherOptions)
-//         if (!(key in vm)) {
-//             defineComputed(vm, key, userDef)
-//         } else {
-//             warn(`计算属性 "${key}" 已经被定义了哦`)
-//         }
-//     }
-
-// }
-// //定义当个计算属性
-// export function defineComputed(target, key, userDef) {
-//     if (typeof userDef === 'function') {
-//         sharedPropertyDefinition.get = createComputedGetter(key)
-//         sharedPropertyDefinition.set = noop
-//     } else {
-//         sharedPropertyDefinition.get = userDef.get
-//             ? userDef.cache !== false
-//                 ? createComputedGetter(key)
-//                 : userDef.get
-//             : noop
-//         sharedPropertyDefinition.set = userDef.set
-//             ? userDef.set
-//             : noop
-//     }
-//     //在VM上绑定computed
-//     Object.defineProperty(target, key, sharedPropertyDefinition)
-// }
-// //创建计算属性默认get方法
-// function createComputedGetter(key) {
-//     return function computedGetter() {
-//         const watcher = this._computedWatchers && this._computedWatchers[key]
-//         if (watcher) {
-//             if (watcher.dirty) {
-//                 watcher.evaluate()
-//             }
-//             if (Dep.target) {
-//                 watcher.depend()
-//             }
-//             return watcher.value
-//         }
-//     }
-// }
-// //初始化data属性
-// function initData(vm) {
-//     var data = vm.$options.data;
-//     if (data) {
-//         typeof data === 'object' ? data = vm.$data = JSON.parse(JSON.stringify(data)) : warn('data should object')
-//     } else {
-//         return;
-//     }
-//     const keys = Object.keys(data)
-//     let i = keys.length;
-//     //代理data到vm
-//     while (i--) {
-//         proxy(vm, '$data', keys[i])
-//     }
-//     //观察data
-//     observe(data, true);
-// }
-
-// //代理 在vm上直接访问$date上面的data
-// export function proxy(target, sourceKey, key) {
-//     sharedPropertyDefinition.get = function proxyGetter() {
-//         return this[sourceKey][key]
-//     }
-//     sharedPropertyDefinition.set = function proxySetter(val) {
-//         this[sourceKey][key] = val
-//     }
-//     Object.defineProperty(target, key, sharedPropertyDefinition)
-// }
+function dedupe (latest, extended, sealed) {
+  // compare latest and sealed to ensure lifecycle hooks won't be duplicated
+  // between merges
+  if (Array.isArray(latest)) {
+    const res = []
+    sealed = Array.isArray(sealed) ? sealed : [sealed]
+    extended = Array.isArray(extended) ? extended : [extended]
+    for (let i = 0; i < latest.length; i++) {
+      // push original options and not sealed options to exclude duplicated options
+      if (extended.indexOf(latest[i]) >= 0 || sealed.indexOf(latest[i]) < 0) {
+        res.push(latest[i])
+      }
+    }
+    return res
+  } else {
+    return latest
+  }
+}
 

@@ -5,7 +5,8 @@ const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
-  entry: './src/core/index.js',
+  // entry: './src/core/index.js',
+  entry: './src/platform/web/entry-runtime-with-compiler.js',
   output: {
     path: path.resolve(__dirname, '../dist'),
     filename: 'test.js'
@@ -26,6 +27,9 @@ module.exports = {
       "src":path.resolve("src"),
       "shared":path.resolve("src/shared"),
       "core":path.resolve("src/core"),
+      "web":path.resolve("src/platform/web"),
+      "compiler":path.resolve("src/compiler"),
+     
     }
   },
   plugins: [

@@ -17,6 +17,7 @@ export default class Dep {
   constructor () {
     this.id = uid++
     this.subs = []
+
   }
 
   addSub (sub) {
@@ -34,6 +35,7 @@ export default class Dep {
   }
 
   notify () {
+    console.log('notify')
     // stabilize the subscriber list first
     const subs = this.subs.slice()
     for (let i = 0, l = subs.length; i < l; i++) {
@@ -49,10 +51,12 @@ Dep.target = null
 const targetStack = []
 
 export function pushTarget (_target) {
+  if(!_target) return
   if (Dep.target) targetStack.push(Dep.target)
   Dep.target = _target
+// console.log(_target)
 }
 
 export function popTarget () {
-  Dep.target = targetStack.pop()
+  // Dep.target = targetStack.pop()
 }
